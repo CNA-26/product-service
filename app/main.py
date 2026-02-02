@@ -6,7 +6,12 @@ app = FastAPI()
 def read_root():
     return { "msg": "Hello!", "v": "0.4" }
 
+products = ["monstera", "cactus"]
 
-@app.get("/items/{id}")
-def read_item(item_id: int, q: str = None):
-    return {"id": id, "q": q}
+@app.get("/products")
+def read_products():
+    return products
+
+@app.get("/products/{product_id}")
+def read_product(product_id: int, q: str = None):
+    return {"id": product_id, "name": products[product_id]}
