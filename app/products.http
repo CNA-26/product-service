@@ -1,0 +1,31 @@
+@apiURL = http://localhost:8080/products
+
+GET {{apiURL}}
+
+###
+
+POST {{apiURL}}
+Content-Type: application/json
+
+{
+    "Id": 12,
+    "ProductName": "Rose",
+    "Price": 12.50,
+    "ProductCode": "ROS-RED-001",
+    "Img": "rose_red.jpg",
+    "DescriptionText": "pretty flower"
+}
+
+###
+
+PUT {{apiURL}}/3
+Content-Type: application/json
+
+{
+    "Id": 3,
+    "Price": 40
+}
+
+###
+
+DELETE {{apiURL}}/5

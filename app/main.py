@@ -1,7 +1,16 @@
 from fastapi import FastAPI
 from datetime import datetime
+from pydantic import BaseModel
 
 app = FastAPI()
+
+class Product(BaseModel):
+    Id: int
+    ProductName: str | None = None
+    Price: float | None = None
+    ProductCode: str | None = None
+    Img: str | None = None
+    DescriptionText: str | None = None
 
 @app.get("/")
 def read_root():
@@ -69,3 +78,11 @@ def read_products():
 @app.get("/products/{product_id}")
 def read_product(product_id: int, q: str = None):
     return {"id": product_id, "name": products[product_id]}
+
+@app.post("/products")
+def create_product(product: Product):
+    return {"message": "Du skapade en produkt", "product": product}
+
+@app.put("/products/{product_id}")
+def update_product(product_id: int, price: float):
+    return {"message": "Du uppdaterade en produkt", "id": product_id}
