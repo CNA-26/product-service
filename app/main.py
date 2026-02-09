@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -86,3 +86,12 @@ def create_product(product: Product):
 @app.put("/products/{product_id}")
 def update_product(product_id: int, price: float):
     return {"message": "Du uppdaterade en produkt", "id": product_id}
+
+@app.delete("/products/{product_id}")
+def delete_product(product_id: int):
+    for product in products:
+        if product["Id"] == product_id:
+            products.remove(product)
+            return {"message": "Product removed", "id": product_id}
+        
+    raise HTTPException(status_code=404, detail="Product not found")
