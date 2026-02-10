@@ -1,20 +1,8 @@
-# docker-fastapi 
+# Product-Service
 
-A sample project for deploying to a PaaS Service like Render or CSC Rahti.
-
-### For deployment to Render
-
-- Log in to https://render.com/
-- Create a New Web Service.
-- Connect to GitHub and choose Connect Credentials.
-- Set Language to Docker.
-- Select the EU Central region (or whatever is nearest to you)
-- Choose Instance Type: Free.
-
-### For deployment to CSC Rahti (OpenShift)
-
-Note: Change the Git reference setting in OpenShift to *main*:    
-    Edit BuildConfig ==> Show advanced git options ==> Git reference: `main`
+### Deployed version
+* API: 
+* Documentation: 
 
 ### For local real-time development
 
