@@ -74,8 +74,8 @@ def create_product(product: Product):
     return {"message": "Du skapade en produkt", "product": product}
 
 @app.put("/products/{product_id}")
-def update_product(product: Product):
-    return {"message": "Du uppdaterade en produkt", "id": product_id}
+def update_product(product: Product, product_id: int):
+    return {"message": "Du uppdaterade en produkt", "produkt": products[product_id]}
 
 @app.delete("/products/{product_id}")
 def delete_product(product_id: int):
