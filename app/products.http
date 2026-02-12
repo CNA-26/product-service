@@ -8,11 +8,11 @@ POST {{apiURL}}
 Content-Type: application/json
 
 {
-    "ProductName": "Rose",
-    "Price": "12.50",
-    "ProductCode": "ROS-RED-001",
-    "Img": "rose_red.jpg",
-    "DescriptionText": "pretty flower"
+    "product_name": "Rose",
+    "price": "12.50",
+    "product_code": "ROS-RED-001",
+    "img": "rose_red.jpg",
+    "description_text": "pretty flower"
 }
 
 ###
@@ -21,11 +21,11 @@ PUT {{apiURL}}/4
 Content-Type: application/json
 
 {
-    "ProductName": "Tulip",
-    "Price": "300",
-    "ProductCode": "ROS-RED-001",
-    "Img": "rose_red.jpg",
-    "DescriptionText": "pretty flower"
+    "product_name": "Tulip",
+    "price": "300",
+    "product_code": "ROS-RED-001",
+    "img": "rose_red.jpg",
+    "description_text": "pretty flower"
 }
 
 ###
