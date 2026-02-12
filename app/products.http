@@ -8,9 +8,8 @@ POST {{apiURL}}
 Content-Type: application/json
 
 {
-    "Id": 12,
     "ProductName": "Rose",
-    "Price": 12.50,
+    "Price": "12.50",
     "ProductCode": "ROS-RED-001",
     "Img": "rose_red.jpg",
     "DescriptionText": "pretty flower"
@@ -18,14 +17,17 @@ Content-Type: application/json
 
 ###
 
-PUT {{apiURL}}/3
+PUT {{apiURL}}/4
 Content-Type: application/json
 
 {
-    "Id": 3,
-    "Price": 40
+    "ProductName": "Tulip",
+    "Price": "300",
+    "ProductCode": "ROS-RED-001",
+    "Img": "rose_red.jpg",
+    "DescriptionText": "pretty flower"
 }
 
 ###
 
-DELETE {{apiURL}}/5
+DELETE {{apiURL}}/7

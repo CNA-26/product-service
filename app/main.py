@@ -4,13 +4,17 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-class Product(BaseModel):
-    Id: int
+class ProductCreate(BaseModel):
     ProductName: str | None = None
     Price: float | None = None
     ProductCode: str | None = None
     Img: str | None = None
     DescriptionText: str | None = None
+
+class Product(ProductCreate):
+    Id: int
+    CreatedAt: datetime
+    UpdatedAt: datetime
 
 @app.get("/")
 def read_root():
@@ -69,13 +73,36 @@ def read_products():
 def read_product(product_id: int):
     return {"id": product_id, "name": products[product_id]}
 
-@app.post("/products")
-def create_product(product: Product):
-    return {"message": "Du skapade en produkt", "product": product}
+@app.post("/products", response_model=Product)
+def create_product(product: ProductCreate):
+    current_id = 5
 
-@app.put("/products/{product_id}")
-def update_product(product: Product, product_id: int):
-    return {"message": "Du uppdaterade en produkt", "produkt": products[product_id]}
+    new_product = {
+        "Id": current_id,
+        **product.dict(),
+        "CreatedAt": datetime.now(),
+        "UpdatedAt": datetime.now()
+    }
+
+    products.append(new_product)
+    current_id += 1
+
+    return new_product
+
+@app.put("/products/{product_id}", response_model=Product)
+def update_product(product: ProductCreate, product_id: int):
+     for idx, excisting_product in enumerate(products):
+        if excisting_product["Id"] == product_id:
+
+            updated_product = {
+                "Id": product_id,
+                **product.dict(),
+                "CreatedAt": excisting_product["CreatedAt"],
+                "UpdatedAt": datetime.now()
+            }
+            products[idx] = updated_product
+            
+            return updated_product
 
 @app.delete("/products/{product_id}")
 def delete_product(product_id: int):
