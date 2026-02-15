@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from datetime import datetime
 from pydantic import BaseModel
+import random, string
 
 app = FastAPI()
 
@@ -112,3 +113,13 @@ def delete_product(product_id: int):
             return {"message": "Product removed", "id": product_id}
         
     raise HTTPException(status_code=404, detail="Product not found")
+
+
+def generate_sku(name:str):
+    prefix = name.replace(" ", "")[:3].upper().ljust(3, "-")
+
+    digits = ''.join(random.choices(string.digits, k=6))
+
+    sku = f"{prefix}{digits}"
+
+    return sku
