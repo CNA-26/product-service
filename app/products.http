@@ -9,15 +9,15 @@ Content-Type: application/json
 
 {
     "product_name": "Rose",
-    "price": "12.50",
-    "product_code": "ROS-RED-001",
+    "price": "20",
+    "product_code": "ROS-RED-002",
     "img": "rose_red.jpg",
     "description_text": "pretty flower"
 }
 
 ###
 
-PUT {{apiURL}}/4
+PUT {{apiURL}}/5
 Content-Type: application/json
 
 {

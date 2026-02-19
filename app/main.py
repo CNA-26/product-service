@@ -1,29 +1,55 @@
+import os
 from fastapi import FastAPI, HTTPException
 from datetime import datetime
-from pydantic import BaseModel
 import random, string
+from dotenv import load_dotenv
+from typing import Optional, List
+from sqlmodel import SQLModel, Field, create_engine, Session, select
+from sqlalchemy import Column, DateTime, func
+
+load_dotenv("../.env")
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL is not set!")
+
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True
+)
 
 app = FastAPI()
 
-class ProductCreate(BaseModel):
-    product_name: str | None = None
-    price: float | None = None
-    product_code: str | None = None
-    img: str | None = None
-    description_text: str | None = None
+#input
+class ProductCreate(SQLModel):
+    __tablename__ = "products"
 
-class Product(ProductCreate):
-    id: int
-    created_at: datetime
-    updated_at: datetime
+    product_name: Optional[str] = None
+    price: Optional[float] = None
+    product_code: Optional[str] = Field(default=None, index=True, unique=True)
+    img: Optional[str] = None
+    description_text: Optional[str] = None
+
+#output
+class Product(ProductCreate, table=True):
+    id: int = Field(default=None, primary_key=True)
+    created_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), server_default=func.now())
+    )
+    updated_at: datetime = Field(
+        sa_column=Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    )
+
+@app.on_event("startup")
+def on_startup():
+    SQLModel.metadata.create_all(engine)
 
 @app.get("/")
 def read_root():
     return { "msg": "Hello!", "v": "0.4" }
 
-from datetime import datetime
-
-products = [
+""" products = [
     {
         "id": 1,
         "product_name": "Monstera Deliciosa",
@@ -64,46 +90,46 @@ products = [
         "created_at": datetime(2025, 1, 22, 13, 10),
         "updated_at": datetime(2025, 1, 22, 13, 10),
     }
-]
+] """
 
-@app.get("/products")
+@app.get("/products", response_model=List[Product])
 def read_products():
-    return products
+    with Session(engine) as session:
+        products = session.exec(select(Product)).all()
+        return products
 
-@app.get("/products/{product_id}")
+@app.get("/products/{product_id}", response_model=Product)
 def read_product(product_id: int):
-    return {"id": product_id, "name": products[product_id]}
+    with Session(engine) as session:
+        db_product = session.get(Product, product_id)
+        return db_product
 
 @app.post("/products", response_model=Product)
 def create_product(product: ProductCreate):
-    current_id = 5
-
-    new_product = {
-        "id": current_id,
-        **product.dict(),
-        "created_at": datetime.now(),
-        "updated_at": datetime.now()
-    }
-
-    products.append(new_product)
-    current_id += 1
-
-    return new_product
+    db_product = Product(**product.model_dump())
+    try:
+        with Session(engine) as session:
+            session.add(db_product)
+            session.commit()
+            session.refresh(db_product)
+            return db_product
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.put("/products/{product_id}", response_model=Product)
 def update_product(product: ProductCreate, product_id: int):
-     for idx, excisting_product in enumerate(products):
-        if excisting_product["id"] == product_id:
+     with Session(engine) as session:
+            db_product = session.get(Product, product_id)
 
-            updated_product = {
-                "id": product_id,
-                **product.dict(),
-                "created_at": excisting_product["created_at"],
-                "updated_at": datetime.now()
-            }
-            products[idx] = updated_product
+            if not db_product:
+                raise HTTPException(status_code=404, detail="not found")
             
-            return updated_product
+            for key, value in product.model_dump(exclude_unset=True).items():
+                setattr(db_product, key, value)
+                session.add(db_product)
+                session.commit()
+                session.refresh(db_product)
+                return db_product
 
 @app.delete("/products/{product_id}")
 def delete_product(product_id: int):
