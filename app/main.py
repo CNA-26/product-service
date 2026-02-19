@@ -43,7 +43,7 @@ class ProductCreate(SQLModel):
 #output
 class Product(ProductCreate, table=True):
     id: int = Field(default=None, primary_key=True)
-    product_code: str = Field(default_factory=generate_sku, index=True, unique=True)
+    product_code: str = Field(index=True, unique=True)
     created_at: datetime = Field(
         sa_column=Column(DateTime(timezone=True), server_default=func.now())
     )
@@ -119,7 +119,8 @@ def create_product(
     product: ProductCreate,
     user: dict = Depends(verify_admin)
     ):
-    db_product = Product(**product.model_dump())
+    SKU = generate_sku(product.product_name)
+    db_product = Product(**product.model_dump(), product_code=SKU)
     try:
         with Session(engine) as session:
             session.add(db_product)
