@@ -22,19 +22,28 @@ from app.auth import verify_admin
 
 app = FastAPI()
 
+def generate_sku(name:str):
+    prefix = name.replace(" ", "")[:3].upper().ljust(3, "-")
+
+    digits = ''.join(random.choices(string.digits, k=6))
+
+    sku = f"{prefix}{digits}"
+
+    return sku
+
 #input
 class ProductCreate(SQLModel):
     __tablename__ = "products"
 
     product_name: Optional[str] = None
     price: Optional[float] = None
-    product_code: Optional[str] = Field(default=None, index=True, unique=True)
     img: Optional[str] = None
     description_text: Optional[str] = None
 
 #output
 class Product(ProductCreate, table=True):
     id: int = Field(default=None, primary_key=True)
+    product_code: str = Field(default_factory=generate_sku, index=True, unique=True)
     created_at: datetime = Field(
         sa_column=Column(DateTime(timezone=True), server_default=func.now())
     )
@@ -144,19 +153,12 @@ def delete_product(
     product_id: int,
     user: dict = Depends(verify_admin)
     ):
-    for product in products:
-        if product["id"] == product_id:
-            products.remove(product)
+    with Session(engine) as session:
+            db_product = session.get(Product, product_id)
+
+            if not db_product:
+                raise HTTPException(status_code=404, detail="not found")
+
+            session.delete(db_product)
+            session.commit()
             return {"message": "Product removed", "id": product_id}
-        
-    raise HTTPException(status_code=404, detail="Product not found")
-
-
-def generate_sku(name:str):
-    prefix = name.replace(" ", "")[:3].upper().ljust(3, "-")
-
-    digits = ''.join(random.choices(string.digits, k=6))
-
-    sku = f"{prefix}{digits}"
-
-    return sku
