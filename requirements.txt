@@ -2,4 +2,5 @@ fastapi[standard]
 pydantic
 sqlmodel
 psycopg2-binary
+python-dotenvpython-jose
 python-dotenv

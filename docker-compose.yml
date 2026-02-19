@@ -9,7 +9,9 @@ services:
       - ./app:/code/app
     ports:
       - "8080:8080"
-    environment:
+    environment: 
+    SECRET_KEY: ${SECRET_KEY}
+    ALGORITHM: HS256
       - DATABASE_URL=${DATABASE_URL}
       - PYTHONUNBUFFERED=1
       - MODE

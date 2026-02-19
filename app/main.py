@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from datetime import datetime
 import random, string
 from dotenv import load_dotenv
@@ -18,6 +18,7 @@ engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True
 )
+from app.auth import verify_admin
 
 app = FastAPI()
 
@@ -105,7 +106,10 @@ def read_product(product_id: int):
         return db_product
 
 @app.post("/products", response_model=Product)
-def create_product(product: ProductCreate):
+def create_product(
+    product: ProductCreate,
+    user: dict = Depends(verify_admin)
+    ):
     db_product = Product(**product.model_dump())
     try:
         with Session(engine) as session:
@@ -117,7 +121,11 @@ def create_product(product: ProductCreate):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.put("/products/{product_id}", response_model=Product)
-def update_product(product: ProductCreate, product_id: int):
+def update_product(
+    product: ProductCreate, 
+    product_id: int,
+    user: dict = Depends(verify_admin)
+    ):
      with Session(engine) as session:
             db_product = session.get(Product, product_id)
 
@@ -132,7 +140,10 @@ def update_product(product: ProductCreate, product_id: int):
                 return db_product
 
 @app.delete("/products/{product_id}")
-def delete_product(product_id: int):
+def delete_product(
+    product_id: int,
+    user: dict = Depends(verify_admin)
+    ):
     for product in products:
         if product["id"] == product_id:
             products.remove(product)
