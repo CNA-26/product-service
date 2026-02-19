@@ -1,14 +1,15 @@
 @apiURL = http://localhost:8080/products
 
-GET {{apiURL}}
+@token = superhemligt
 
 ###
 
 POST {{apiURL}}
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
-    "product_name": "Rose",
+    "product_name": "Iris",
     "price": "12.50",
     "product_code": "ROS-RED-001",
     "img": "rose_red.jpg",
@@ -19,6 +20,7 @@ Content-Type: application/json
 
 PUT {{apiURL}}/4
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
     "product_name": "Tulip",
@@ -30,4 +32,5 @@ Content-Type: application/json
 
 ###
 
-DELETE {{apiURL}}/7
+DELETE {{apiURL}}/5
+Authorization: Bearer {{token}}

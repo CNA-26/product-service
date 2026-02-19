@@ -1,7 +1,8 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from datetime import datetime
 from pydantic import BaseModel
 import random, string
+from app.auth import verify_admin
 
 app = FastAPI()
 
@@ -75,7 +76,10 @@ def read_product(product_id: int):
     return {"id": product_id, "name": products[product_id]}
 
 @app.post("/products", response_model=Product)
-def create_product(product: ProductCreate):
+def create_product(
+    product: ProductCreate,
+    user: dict = Depends(verify_admin)
+    ):
     current_id = 5
 
     new_product = {
@@ -91,7 +95,11 @@ def create_product(product: ProductCreate):
     return new_product
 
 @app.put("/products/{product_id}", response_model=Product)
-def update_product(product: ProductCreate, product_id: int):
+def update_product(
+    product: ProductCreate, 
+    product_id: int,
+    user: dict = Depends(verify_admin)
+    ):
      for idx, excisting_product in enumerate(products):
         if excisting_product["id"] == product_id:
 
@@ -106,7 +114,10 @@ def update_product(product: ProductCreate, product_id: int):
             return updated_product
 
 @app.delete("/products/{product_id}")
-def delete_product(product_id: int):
+def delete_product(
+    product_id: int,
+    user: dict = Depends(verify_admin)
+    ):
     for product in products:
         if product["id"] == product_id:
             products.remove(product)

@@ -10,5 +10,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - PYTHONUNBUFFERED=1
-      - MODE
+        environment:
+        SECRET_KEY: ${SECRET_KEY}
+        ALGORITHM: HS256
+        - PYTHONUNBUFFERED=1
+        - MODE
