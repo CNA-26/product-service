@@ -9,11 +9,10 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "product_name": "Iris",
-    "price": "12.50",
-    "product_code": "ROS-RED-001",
-    "img": "rose_red.jpg",
-    "description_text": "pretty flower"
+    "product_name": "Palmtree",
+    "price": 12.50,
+    "img": "palm.jpg",
+    "description_text": "tree"
 }
 
 ###
@@ -24,8 +23,7 @@ Authorization: Bearer {{token}}
 
 {
     "product_name": "Tulip",
-    "price": "300",
-    "product_code": "ROS-RED-001",
+    "price": 300,
     "img": "rose_red.jpg",
     "description_text": "pretty flower"
 }

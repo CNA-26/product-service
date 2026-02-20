@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, create_engine, Session, select
 from sqlalchemy import Column, DateTime, func
+import httpx
 
 load_dotenv("../.env")
 
@@ -55,53 +56,6 @@ class Product(ProductCreate, table=True):
 def on_startup():
     SQLModel.metadata.create_all(engine)
 
-@app.get("/")
-def read_root():
-    return { "msg": "Hello!", "v": "0.4" }
-
-""" products = [
-    {
-        "id": 1,
-        "product_name": "Monstera Deliciosa",
-        "price": 29.99,
-        "product_code": "PLACEHOLDER001",
-        "img": "monstera.jpg",
-        "description_text": "A popular tropical plant with large, glossy leaves. Easy to care for and perfect for bright indoor spaces.",
-        "created_at": datetime(2025, 1, 10, 9, 30),
-        "updated_at": datetime(2025, 1, 15, 14, 45),
-    },
-    {
-        "id": 2,
-        "product_name": "Snake Plant",
-        "price": 19.99,
-        "product_code": "PLACEHOLDER002",
-        "img": "snake_plant.jpg",
-        "description_text": "A hardy, low-maintenance plant known for improving air quality. Thrives in low light.",
-        "created_at": datetime(2025, 1, 12, 11, 0),
-        "updated_at": datetime(2025, 1, 12, 11, 0),
-    },
-    {
-        "id": 3,
-        "product_name": "Fiddle Leaf Fig",
-        "price": 49.99,
-        "product_code": "PLACEHOLDER003",
-        "img": "fiddle_leaf_fig.jpg",
-        "description_text": "A statement plant with large, violin-shaped leaves. Prefers bright, indirect light.",
-        "created_at": datetime(2025, 1, 18, 16, 20),
-        "updated_at": datetime(2025, 1, 20, 10, 5),
-    },
-    {
-        "id": 4,
-        "product_name": "Pothos Golden",
-        "price": 14.99,
-        "product_code": "PLACEHOLDER004",
-        "img": "golden_pothos.jpg",
-        "description_text": "A fast-growing trailing plant that’s perfect for shelves or hanging baskets.",
-        "created_at": datetime(2025, 1, 22, 13, 10),
-        "updated_at": datetime(2025, 1, 22, 13, 10),
-    }
-] """
-
 @app.get("/products", response_model=List[Product])
 def read_products():
     with Session(engine) as session:
@@ -115,18 +69,36 @@ def read_product(product_id: int):
         return db_product
 
 @app.post("/products", response_model=Product)
-def create_product(
+async def create_product(
     product: ProductCreate,
     user: dict = Depends(verify_admin)
     ):
     SKU = generate_sku(product.product_name)
-    db_product = Product(**product.model_dump(), product_code=SKU)
+    quantity = product.quantity if hasattr(product, "quantity") else 0
+
+    db_product = Product(**product.model_dump(exclude={"quantity"}), product_code=SKU)
+
     try:
         with Session(engine) as session:
             session.add(db_product)
             session.commit()
             session.refresh(db_product)
-            return db_product
+
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.post(
+                "https://inventory-service-cna26-inventoryservice.2.rahtiapp.fi/api/products",
+                json={
+                    "sku": SKU,
+                    "quantity": quantity or 0
+                }
+            )
+        response.raise_for_status()
+
+        return db_product
+        
+    except httpx.HTTPError:
+        raise HTTPException(status_code=502, detail="Inventory service failed")
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
