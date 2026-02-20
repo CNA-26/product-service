@@ -5,13 +5,13 @@ services:
     build:
       context: .
     volumes:
-      # Mount the local app directory to the /code/app directory in the container    
+      # Mount the local app directory to the /code/app directory in the container
       - ./app:/code/app
     ports:
       - "8080:8080"
-    environment: 
-    SECRET_KEY: ${SECRET_KEY}
-    ALGORITHM: HS256
-      - DATABASE_URL=${DATABASE_URL}
-      - PYTHONUNBUFFERED=1
-      - MODE
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: HS256
+      DATABASE_URL: ${DATABASE_URL}
+      PYTHONUNBUFFERED: 1
+      MODE: 
