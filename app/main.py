@@ -34,15 +34,19 @@ def generate_sku(name:str):
 
 #input
 class ProductCreate(SQLModel):
-    __tablename__ = "products"
-
     product_name: Optional[str] = None
     price: Optional[float] = None
     img: Optional[str] = None
     description_text: Optional[str] = None
 
+#quantity
+class ProductQuantity(ProductCreate):
+    quantity: int | None = None
+
 #output
 class Product(ProductCreate, table=True):
+    __tablename__ = "products"
+
     id: int = Field(default=None, primary_key=True)
     product_code: str = Field(index=True, unique=True)
     created_at: datetime = Field(
@@ -70,11 +74,10 @@ def read_product(product_id: int):
 
 @app.post("/products", response_model=Product)
 async def create_product(
-    product: ProductCreate,
+    product: ProductQuantity,
     user: dict = Depends(verify_admin)
     ):
     SKU = generate_sku(product.product_name)
-    quantity = product.quantity if hasattr(product, "quantity") else 0
 
     db_product = Product(**product.model_dump(exclude={"quantity"}), product_code=SKU)
 
@@ -89,7 +92,7 @@ async def create_product(
                 "https://inventory-service-cna26-inventoryservice.2.rahtiapp.fi/api/products",
                 json={
                     "sku": SKU,
-                    "quantity": quantity or 0
+                    "quantity": product.quantity or 0
                 }
             )
         response.raise_for_status()
@@ -108,18 +111,18 @@ def update_product(
     product_id: int,
     user: dict = Depends(verify_admin)
     ):
-     with Session(engine) as session:
-            db_product = session.get(Product, product_id)
+    with Session(engine) as session:
+        db_product = session.get(Product, product_id)
 
-            if not db_product:
-                raise HTTPException(status_code=404, detail="not found")
+        if not db_product:
+            raise HTTPException(status_code=404, detail="not found")
             
-            for key, value in product.model_dump(exclude_unset=True).items():
-                setattr(db_product, key, value)
-                session.add(db_product)
-                session.commit()
-                session.refresh(db_product)
-                return db_product
+        for key, value in product.model_dump(exclude_unset=True).items():
+            setattr(db_product, key, value)
+        session.add(db_product)
+        session.commit()
+        session.refresh(db_product)
+        return db_product
 
 @app.delete("/products/{product_id}")
 def delete_product(

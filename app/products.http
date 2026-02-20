@@ -9,15 +9,16 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "product_name": "Palmtree",
+    "product_name": "Tree",
     "price": 12.50,
-    "img": "palm.jpg",
-    "description_text": "tree"
+    "img": "tree.jpg",
+    "description_text": "tree",
+    "quantity": 4
 }
 
 ###
 
-PUT {{apiURL}}/5
+PUT {{apiURL}}/12
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
