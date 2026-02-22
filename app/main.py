@@ -29,7 +29,8 @@ origins = [
     "https://admin-frontend-cna26-admin-frontend.2.rahtiapp.fi/",
     "https://store-frontend-git-store-frontend.2.rahtiapp.fi/",
     "https://inventory-service-cna26-inventoryservice.2.rahtiapp.fi/",
-    "https://order-service-git-order-service.2.rahtiapp.fi/"
+    "https://order-service-git-order-service.2.rahtiapp.fi/",
+    "*"
 ]
 
 app.add_middleware(
