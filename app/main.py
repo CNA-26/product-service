@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import random, string
 from dotenv import load_dotenv
@@ -22,6 +23,23 @@ engine = create_engine(
 from app.auth import verify_admin
 
 app = FastAPI()
+
+origins = [
+    "http://localhost:5174/",
+    "https://admin-frontend-cna26-admin-frontend.2.rahtiapp.fi/",
+    "https://store-frontend-git-store-frontend.2.rahtiapp.fi/",
+    "https://inventory-service-cna26-inventoryservice.2.rahtiapp.fi/",
+    "https://order-service-git-order-service.2.rahtiapp.fi/",
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def generate_sku(name:str):
     prefix = name.replace(" ", "")[:3].upper().ljust(3, "-")
