@@ -33,3 +33,10 @@ Authorization: Bearer {{token}}
 
 DELETE {{apiURL}}/4
 Authorization: Bearer {{token}}
+
+###
+
+POST {{apiURL}}/7/image
+Content-Type: multipart/form-data
+
+image=@./rose.jpg
