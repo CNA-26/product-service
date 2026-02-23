@@ -36,7 +36,6 @@ def generate_sku(name:str):
 class ProductCreate(SQLModel):
     product_name: Optional[str] = None
     price: Optional[float] = None
-    img: Optional[str] = None
     description_text: Optional[str] = None
 
 #quantity
