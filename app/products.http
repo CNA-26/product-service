@@ -9,10 +9,10 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "product_name": "Tree",
-    "price": 12.50,
-    "img": "tree.jpg",
-    "description_text": "tree",
+    "product_name": "Sunflower",
+    "price": 14.50,
+    "img": "sunflower.jpg",
+    "description_text": "sunflower",
     "quantity": 4
 }
 
@@ -31,5 +31,5 @@ Authorization: Bearer {{token}}
 
 ###
 
-DELETE {{apiURL}}/4
+DELETE {{apiURL}}/15
 Authorization: Bearer {{token}}
