@@ -9,11 +9,11 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "product_name": "Tree",
-    "price": 12.50,
-    "img": "tree.jpg",
-    "description_text": "tree",
-    "quantity": 4
+    "product_name": "Pine",
+    "price": 59.90,
+    "img": "pine.jpg",
+    "description_text": "Pine tree.",
+    "quantity": 1
 }
 
 ###
