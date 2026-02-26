@@ -194,7 +194,7 @@ async def create_product(
         raise HTTPException(status_code=500, detail=str(e))
     
 @app.post("/products/{product_id}/image")
-async def upload_image(product_id: int, image: UploadFile = File(...)):
+async def upload_image(product_id: int, image: UploadFile = File(...), user: dict = Depends(verify_admin)):
     with Session(engine) as session:
         product = session.get(Product, product_id)
         if not product:
