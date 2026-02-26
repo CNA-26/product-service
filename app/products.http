@@ -36,7 +36,12 @@ Authorization: Bearer {{token}}
 
 ###
 
-POST {{apiURL}}/7/image
-Content-Type: multipart/form-data
+POST http://localhost:8080/products/8/image
+Content-Type: multipart/form-data; boundary=boundary
 
-image=@./rose.jpg
+--boundary
+Content-Disposition: form-data; name="image"; filename="rose.jpg"
+Content-Type: image/jpeg
+
+< ./rose.jpg
+--boundary--

@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from datetime import datetime
 import random, string
 from dotenv import load_dotenv
@@ -10,7 +11,7 @@ from sqlalchemy import Column, DateTime, func
 from sqlalchemy.orm import selectinload
 import httpx
 from uuid import uuid4
-import shutil
+from app.auth import verify_admin
 
 load_dotenv("../.env")
 
@@ -23,9 +24,19 @@ engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True
 )
-from app.auth import verify_admin
+
+IMAGE_URL = os.environ.get("IMAGE_URL")
+
+if not IMAGE_URL:
+    raise ValueError("Cannot get image URL")
+    
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads", "products")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app = FastAPI()
+
+app.mount("/uploads", StaticFiles(directory=os.path.join(BASE_DIR, "uploads")), name="uploads")
 
 origins = [
     "http://localhost:5174/",
@@ -43,9 +54,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-IMAGE_URL = os.environ.get("IMAGE_URL")
-UPLOAD_FOLDER = "uploads/products"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def generate_sku(name:str):
     prefix = name.replace(" ", "")[:3].upper().ljust(3, "-")
@@ -196,15 +204,22 @@ async def upload_image(product_id: int, image: UploadFile = File(...)):
         filename = f"{uuid4()}.{image.filename.split('.')[-1]}"
         file_path = os.path.join(UPLOAD_FOLDER, filename)
 
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(image.file, buffer)
+        try:
+            await image.seek(0)
+            content = await image.read()
 
-        product_image = ProductImage(product_id=product.id, image=filename)
-        session.add(product_image)
-        session.commit()
-        session.refresh(product_image)
+            with open(file_path, "wb") as f:
+                f.write(content)
 
-        return product_image   
+            product_image = ProductImage(product_id=product.id, image=filename)
+            session.add(product_image)
+            session.commit()
+            session.refresh(product_image)
+
+            return product_image  
+        except Exception as e:
+            print(f"FEL VID SPARANDE: {e}")
+            raise HTTPException(status_code=500, detail=str(e)) 
 
 
 @app.put("/products/{product_id}", response_model=Product)
