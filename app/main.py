@@ -166,6 +166,7 @@ async def create_product(
     user: dict = Depends(verify_admin)
     ):
     SKU = generate_sku(product.product_name)
+    token = user.get("raw_token")
 
     db_product = Product(**product.model_dump(exclude={"quantity"}), product_code=SKU)
 
@@ -181,7 +182,9 @@ async def create_product(
                 json={
                     "sku": SKU,
                     "quantity": product.quantity or 0
-                }
+                },
+                headers={
+                    "Authorization": f"Bearer{token}"}
             )
         response.raise_for_status()
 
