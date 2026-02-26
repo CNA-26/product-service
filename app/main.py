@@ -27,8 +27,10 @@ engine = create_engine(
 
 IMAGE_URL = os.environ.get("IMAGE_URL")
 
+# Dethär behövs bara LOKALT
 if not IMAGE_URL:
-    raise ValueError("Cannot get image URL")
+    IMAGE_URL = "http://127.0.0.1:8080/uploads/products"
+    print("Cannot load image URL from .env")
     
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads", "products")
