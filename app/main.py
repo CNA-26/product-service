@@ -184,7 +184,7 @@ async def create_product(
                     "quantity": product.quantity or 0
                 },
                 headers={
-                    "Authorization": f"Bearer{token}"}
+                    "Authorization": f"Bearer {token}"}
             )
         response.raise_for_status()
 
