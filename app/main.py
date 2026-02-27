@@ -69,6 +69,7 @@ class ProductCreate(SQLModel):
     product_name: Optional[str] = None
     price: Optional[float] = None
     description_text: Optional[str] = None
+    category_id: int
 
 #image input
 class ImageCreate(SQLModel):
@@ -77,6 +78,15 @@ class ImageCreate(SQLModel):
 #quantity
 class ProductQuantity(ProductCreate):
     quantity: int | None = None
+
+#category table
+class Category(SQLModel, table=True):
+    __tablename__ = "categories"
+
+    id: int = Field(default=None, primary_key=True)
+    name: str = Field(unique=True, index=True)
+
+    products: List["Product"] = Relationship(back_populates="category")
 
 #output
 class Product(ProductCreate, table=True):
@@ -90,6 +100,8 @@ class Product(ProductCreate, table=True):
     updated_at: datetime = Field(
         sa_column=Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     )
+    category_id: int = Field(foreign_key="categories.id")
+    category: Optional[Category] = Relationship(back_populates="products")
     images: List["ProductImage"] = Relationship(back_populates="product")
 
     @property
@@ -106,6 +118,7 @@ class ProductRead(SQLModel):
     created_at: datetime
     updated_at: datetime
     image_urls: List[str] = []
+    category: Optional[str] = None 
 
     class Config:
         from_attributes = True

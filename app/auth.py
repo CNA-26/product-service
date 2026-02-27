@@ -17,7 +17,7 @@ def verify_admin(
         token = credentials.credentials
 
         try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM], options={"verify_aud": False})
         except JWTError:
               raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
