@@ -178,36 +178,37 @@ async def create_product(
     product: ProductQuantity,
     user: dict = Depends(verify_admin)
     ):
-    SKU = generate_sku(product.product_name)
+    
     token = user.get("raw_token")
 
-    db_product = Product(**product.model_dump(exclude={"quantity"}), product_code=SKU)
-
-    try:
-        with Session(engine) as session:
+    with Session(engine) as session:
+        for _ in range(5):
+            SKU = generate_sku(product.product_name)
+            db_product = Product(**product.model_dump(exclude={"quantity"}), product_code=SKU)
             session.add(db_product)
-            session.commit()
-            session.refresh(db_product)
 
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.post(
-                "https://inventory-service-cna26-inventoryservice.2.rahtiapp.fi/api/products",
-                json={
-                    "sku": SKU,
-                    "quantity": product.quantity or 0
-                },
-                headers={
-                    "Authorization": f"Bearer {token}"}
-            )
-        response.raise_for_status()
+            try:
+                session.flush()
 
-        return db_product
+                async with httpx.AsyncClient(timeout=5.0) as client:
+                    response = await client.post(
+                        "https://inventory-service-cna26-inventoryservice.2.rahtiapp.fi/api/products",
+                        json={"sku": SKU,"quantity": product.quantity or 0},
+                        headers={"Authorization": f"Bearer {token}"}
+                    )
+                response.raise_for_status()
+
+                session.commit()
+                session.refresh(db_product)
+                return db_product
         
-    except httpx.HTTPError:
-        raise HTTPException(status_code=502, detail="Inventory service failed")
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+            except httpx.HTTPStatusError as e:
+                session.rollback()
+                if e.response.status_code == 409:
+                    continue
+                raise HTTPException(status_code=502, detail="Inventory service failed")
+            
+        raise HTTPException(status_code=500, detail="Could not generate unique SKU")
     
 @app.post("/products/{product_id}/image")
 async def upload_image(product_id: int, image: UploadFile = File(...), user: dict = Depends(verify_admin)):
