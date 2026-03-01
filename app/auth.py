@@ -44,4 +44,6 @@ def verify_admin(
                     detail="No permission"
               )
         
+        payload["raw_token"] = token
+        
         return payload

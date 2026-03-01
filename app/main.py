@@ -27,8 +27,10 @@ engine = create_engine(
 
 IMAGE_URL = os.environ.get("IMAGE_URL")
 
+# Dethär behövs bara LOKALT
 if not IMAGE_URL:
-    raise ValueError("Cannot get image URL")
+    IMAGE_URL = "http://127.0.0.1:8080/uploads/products"
+    print("Cannot load image URL from .env")
     
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads", "products")
@@ -67,6 +69,7 @@ class ProductCreate(SQLModel):
     product_name: Optional[str] = None
     price: Optional[float] = None
     description_text: Optional[str] = None
+    category_id: int
 
 #image input
 class ImageCreate(SQLModel):
@@ -75,6 +78,15 @@ class ImageCreate(SQLModel):
 #quantity
 class ProductQuantity(ProductCreate):
     quantity: int | None = None
+
+#category table
+class Category(SQLModel, table=True):
+    __tablename__ = "categories"
+
+    id: int = Field(default=None, primary_key=True)
+    name: str = Field(unique=True, index=True)
+
+    products: List["Product"] = Relationship(back_populates="category")
 
 #output
 class Product(ProductCreate, table=True):
@@ -88,6 +100,8 @@ class Product(ProductCreate, table=True):
     updated_at: datetime = Field(
         sa_column=Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     )
+    category_id: int = Field(foreign_key="categories.id")
+    category: Optional[Category] = Relationship(back_populates="products")
     images: List["ProductImage"] = Relationship(back_populates="product")
 
     @property
@@ -104,6 +118,7 @@ class ProductRead(SQLModel):
     created_at: datetime
     updated_at: datetime
     image_urls: List[str] = []
+    category: Optional[str] = None 
 
     class Config:
         from_attributes = True
@@ -163,33 +178,37 @@ async def create_product(
     product: ProductQuantity,
     user: dict = Depends(verify_admin)
     ):
-    SKU = generate_sku(product.product_name)
-
-    db_product = Product(**product.model_dump(exclude={"quantity"}), product_code=SKU)
-
-    try:
-        with Session(engine) as session:
-            session.add(db_product)
-            session.commit()
-            session.refresh(db_product)
-
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.post(
-                "https://inventory-service-cna26-inventoryservice.2.rahtiapp.fi/api/products",
-                json={
-                    "sku": SKU,
-                    "quantity": product.quantity or 0
-                }
-            )
-        response.raise_for_status()
-
-        return db_product
-        
-    except httpx.HTTPError:
-        raise HTTPException(status_code=502, detail="Inventory service failed")
     
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    token = user.get("raw_token")
+
+    with Session(engine) as session:
+        for _ in range(5):
+            SKU = generate_sku(product.product_name)
+            db_product = Product(**product.model_dump(exclude={"quantity"}), product_code=SKU)
+            session.add(db_product)
+
+            try:
+                session.flush()
+
+                async with httpx.AsyncClient(timeout=5.0) as client:
+                    response = await client.post(
+                        "https://inventory-service-cna26-inventoryservice.2.rahtiapp.fi/api/products",
+                        json={"sku": SKU,"quantity": product.quantity or 0},
+                        headers={"Authorization": f"Bearer {token}"}
+                    )
+                response.raise_for_status()
+
+                session.commit()
+                session.refresh(db_product)
+                return db_product
+        
+            except httpx.HTTPStatusError as e:
+                session.rollback()
+                if e.response.status_code == 409:
+                    continue
+                raise HTTPException(status_code=502, detail="Inventory service failed")
+            
+        raise HTTPException(status_code=500, detail="Could not generate unique SKU")
     
 @app.post("/products/{product_id}/image")
 async def upload_image(product_id: int, image: UploadFile = File(...), user: dict = Depends(verify_admin)):
