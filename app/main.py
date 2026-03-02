@@ -136,7 +136,7 @@ def on_startup():
 @app.get("/products", response_model=List[ProductRead])
 def read_products():
     with Session(engine) as session:
-        products = session.exec(select(Product).options(selectinload(Product.images))).all()
+        products = session.exec(select(Product).options(selectinload(Product.images), selectinload(Product.category))).all()
         return [
             ProductRead(
                 id=p.id,
@@ -146,6 +146,7 @@ def read_products():
                 product_code=p.product_code,
                 created_at=p.created_at,
                 updated_at=p.updated_at,
+                category=p.category.name if p.category else None,
                 image_urls=[f"{IMAGE_URL}/{img.image}" for img in p.images]
             )
             for p in products
@@ -165,6 +166,7 @@ def read_product(product_id: int):
             product_code=db_product.product_code,
             created_at=db_product.created_at,
             updated_at=db_product.updated_at,
+            category=db_product.category.name if db_product.category else None,
             image_urls=[f"{IMAGE_URL}/{img.image}" for img in db_product.images]
         )
 
