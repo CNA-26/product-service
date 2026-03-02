@@ -6,11 +6,6 @@ COPY ./requirements.txt /code/requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-RUN mkdir -p /app/uploads/products
-RUN chmod -R 775 /app/uploads/products
-RUN chgrp -R 0 /app/uploads/products
-RUN chmod -R g+rwX /app/uploads/products
-
 COPY ./app /code/app
 
 # This can be overridden in .env if declared in docker-compose

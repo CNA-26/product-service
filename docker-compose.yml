@@ -7,7 +7,6 @@ services:
     volumes:
       # Mount the local app directory to the /code/app directory in the container
       - ./app:/code/app
-      - ./uploads/products:/code/app/uploads/products
     ports:
       - "8080:8080"
     environment:
