@@ -9,12 +9,12 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "product_name": "Anemone",
-    "price": 5.99,
-    "img": "anemone.jpg",
-    "description_text": "Anemone flower.",
+    "product_name": "Blåsippa",
+    "price": 1.00,
+    "img": "blåsippa.jpg",
+    "description_text": "Blåsippa flower.",
     "category_id": 2,
-    "quantity": 10
+    "quantity": 20
 }
 
 ###

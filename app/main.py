@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, Depends, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from datetime import datetime
-import random, string
+import random, string, unicodedata
 from dotenv import load_dotenv
 from typing import Optional, List
 from sqlmodel import SQLModel, Field, create_engine, Session, select, Relationship
@@ -52,8 +52,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def normalize_swedish(text: str) -> str:
+    normalized = unicodedata.normalize("NFKD", text)
+    return normalized.encode("ascii", "ignore").decode("ascii")
+
 def generate_sku(name:str):
-    prefix = name.replace(" ", "")[:3].upper().ljust(3, "-")
+    clean_name = normalize_swedish(name)
+    prefix = clean_name.replace(" ", "")[:3].upper().ljust(3, "-")
     digits = ''.join(random.choices(string.digits, k=6))
 
     sku = f"{prefix}{digits}"
