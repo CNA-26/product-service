@@ -22,6 +22,7 @@ app.mount("/uploads", StaticFiles(directory=os.path.join(BASE_DIR, "uploads")), 
 origins = [
     "https://store-frontend-git-store-frontend.2.rahtiapp.fi",
     "https://admin-frontend-nico-branch-cna26-admin-frontend.2.rahtiapp.fi"
+    "*"
 ]
 
 app.add_middleware(
