@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads", "products")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-@router.get("/products", response_model=List[ProductRead])
+@router.get("/", response_model=List[ProductRead])
 def read_products():
     with Session(engine) as session:
         products = session.exec(select(Product).options(selectinload(Product.images), selectinload(Product.category))).all()
@@ -38,7 +38,7 @@ def read_products():
             for p in products
         ]
 
-@router.get("/products/{product_id}", response_model=ProductRead)
+@router.get("/{product_id}", response_model=ProductRead)
 def read_product(product_id: int):
     with Session(engine) as session:
         db_product = session.get(Product, product_id)
@@ -56,7 +56,7 @@ def read_product(product_id: int):
             image_urls=[f"{IMAGE_URL}/{img.image}" for img in db_product.images]
         )
 
-@router.post("/products", response_model=Product)
+@router.post("/", response_model=Product)
 async def create_product(
     product: ProductQuantity,
     user: dict = Depends(verify_admin)
@@ -93,7 +93,7 @@ async def create_product(
             
         raise HTTPException(status_code=500, detail="Could not generate unique SKU")
     
-@router.post("/products/{product_id}/image")
+@router.post("/{product_id}/image")
 async def upload_image(product_id: int, image: UploadFile = File(...), user: dict = Depends(verify_admin)):
     with Session(engine) as session:
         product = session.get(Product, product_id)
@@ -124,7 +124,7 @@ async def upload_image(product_id: int, image: UploadFile = File(...), user: dic
             raise HTTPException(status_code=500, detail=str(e)) 
 
 
-@router.put("/products/{product_id}", response_model=Product)
+@router.put("/{product_id}", response_model=Product)
 def update_product(
     product: ProductCreate, 
     product_id: int,
@@ -143,7 +143,7 @@ def update_product(
         session.refresh(db_product)
         return db_product
 
-@router.delete("/products/{product_id}")
+@router.delete("/{product_id}")
 def delete_product(
     product_id: int,
     user: dict = Depends(verify_admin)
