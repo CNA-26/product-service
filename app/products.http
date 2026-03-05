@@ -1,7 +1,6 @@
 @apiURL = http://localhost:8080/products
 
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwicm9sZSI6IkFETUlOIiwiZXhwIjoxNzcyNjU0ODI2fQ.-0NPHuCEHJjFdLA1aj0JhZyJvtwYUoYhZxsCMIRtuW8
-
+@token = superhemligt
 ###
 
 POST {{apiURL}}

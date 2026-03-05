@@ -6,7 +6,6 @@ from fastapi.staticfiles import StaticFiles
 from app.database import create_db
 from app.routers import products
 
-
 app = FastAPI()
 
 @app.on_event("startup")
