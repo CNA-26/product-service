@@ -12,14 +12,14 @@ from app.schemas import ProductCreate, ProductRead, ProductQuantity
 from app.utils import generate_sku
 from app.auth import verify_admin
 
+INVENTORY_URL = os.environ.get("INVENTORY_URL")
+
 router = APIRouter()
 
 IMAGE_URL = os.environ.get("IMAGE_URL")   
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads", "products")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-INVENTORY_URL = os.environ.get("INVENTORY_URL")
 
 @router.get("/", response_model=List[ProductRead])
 def read_products():

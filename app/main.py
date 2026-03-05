@@ -6,11 +6,11 @@ from fastapi.staticfiles import StaticFiles
 from app.database import create_db
 from app.routers import products
 
-app = FastAPI()
-
 INVENTORY_URL = os.environ.get("INVENTORY_URL")
 ADMIN_FRONTEND_URL = os.environ.get("ADMIN_FRONTEND_URL")
 STORE_FRONTEND_URL = os.environ.get("STORE_FRONTEND_URL")
+
+app = FastAPI()
 
 @app.on_event("startup")
 def on_startup():
