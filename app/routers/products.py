@@ -19,6 +19,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads", "products")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+INVENTORY_URL = os.environ.get("INVENTORY_URL")
+
 @router.get("/", response_model=List[ProductRead])
 def read_products():
     with Session(engine) as session:
@@ -73,9 +75,12 @@ async def create_product(
             try:
                 session.flush()
 
+                if not INVENTORY_URL:
+                    raise ValueError("INVENTORY_URL is not set")
+
                 async with httpx.AsyncClient(timeout=5.0) as client:
                     response = await client.post(
-                        "https://inventory-service-cna26-inventoryservice.2.rahtiapp.fi/api/products",
+                        INVENTORY_URL,
                         json={"sku": SKU,"quantity": product.quantity or 0},
                         headers={"Authorization": f"Bearer {token}"}
                     )
@@ -120,7 +125,7 @@ async def upload_image(product_id: int, image: UploadFile = File(...), user: dic
 
             return product_image  
         except Exception as e:
-            print(f"FEL VID SPARANDE: {e}")
+            print(f"Error in creating: {e}")
             raise HTTPException(status_code=500, detail=str(e)) 
 
 

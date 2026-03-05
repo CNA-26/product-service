@@ -8,6 +8,10 @@ from app.routers import products
 
 app = FastAPI()
 
+INVENTORY_URL = os.environ.get("INVENTORY_URL")
+ADMIN_FRONTEND_URL = os.environ.get("ADMIN_FRONTEND_URL")
+STORE_FRONTEND_URL = os.environ.get("STORE_FRONTEND_URL")
+
 @app.on_event("startup")
 def on_startup():
     create_db()
@@ -16,12 +20,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app.mount("/uploads", StaticFiles(directory=os.path.join(BASE_DIR, "uploads")), name="uploads")
 
 origins = [
-    "http://localhost:5174/",
-    "https://admin-frontend-cna26-admin-frontend.2.rahtiapp.fi/",
-    "https://store-frontend-git-store-frontend.2.rahtiapp.fi/",
-    "https://inventory-service-cna26-inventoryservice.2.rahtiapp.fi/",
-    "https://order-service-git-order-service.2.rahtiapp.fi/",
-    "*"
+    ADMIN_FRONTEND_URL,
+    STORE_FRONTEND_URL,
+    INVENTORY_URL
 ]
 
 app.add_middleware(
