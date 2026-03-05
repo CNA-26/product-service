@@ -12,7 +12,7 @@ from app.schemas import ProductCreate, ProductRead, ProductQuantity
 from app.utils import generate_sku
 from app.auth import verify_admin
 
-INVENTORY_URL = os.environ.get("INVENTORY_URL")
+# INVENTORY_URL = os.environ.get("INVENTORY_URL")
 
 router = APIRouter()
 
@@ -75,12 +75,9 @@ async def create_product(
             try:
                 session.flush()
 
-                if not INVENTORY_URL:
-                    raise ValueError("INVENTORY_URL is not set")
-
                 async with httpx.AsyncClient(timeout=5.0) as client:
                     response = await client.post(
-                        INVENTORY_URL,
+                        "https://inventory-service-cna26-inventoryservice.2.rahtiapp.fi",
                         json={"sku": SKU,"quantity": product.quantity or 0},
                         headers={"Authorization": f"Bearer {token}"}
                     )

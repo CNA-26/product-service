@@ -6,9 +6,9 @@ from fastapi.staticfiles import StaticFiles
 from app.database import create_db
 from app.routers import products
 
-INVENTORY_URL = os.environ.get("INVENTORY_URL")
-ADMIN_FRONTEND_URL = os.environ.get("ADMIN_FRONTEND_URL")
-STORE_FRONTEND_URL = os.environ.get("STORE_FRONTEND_URL")
+#INVENTORY_URL = os.environ.get("INVENTORY_URL")
+#ADMIN_FRONTEND_URL = os.environ.get("ADMIN_FRONTEND_URL")
+#STORE_FRONTEND_URL = os.environ.get("STORE_FRONTEND_URL")
 
 app = FastAPI()
 
@@ -20,9 +20,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app.mount("/uploads", StaticFiles(directory=os.path.join(BASE_DIR, "uploads")), name="uploads")
 
 origins = [
-    ADMIN_FRONTEND_URL,
-    STORE_FRONTEND_URL,
-    INVENTORY_URL
+    "https://store-frontend-git-store-frontend.2.rahtiapp.fi",
+    "https://admin-frontend-nico-branch-cna26-admin-frontend.2.rahtiapp.fi",
 ]
 
 app.add_middleware(
